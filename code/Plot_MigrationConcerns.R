@@ -1,6 +1,6 @@
 # Load/install packages
 if (!require("xfun")) install.packages("xfun")
-pkg_attach2("tidyverse", "rio", "fst", "cowplot")
+pkg_attach2("tidyverse", "rio", "fst", "cowplot", "zoo")
 
 # Load data
 barometer.orig <- import("./data/ZA2391_v12-0-0.dta")
@@ -33,11 +33,37 @@ barometer.df <- barometer.df %>%
   group_by(month, year) %>%
   summarise(pct = weighted.mean(migration, w = repweight)) %>%
   ungroup() %>%
-  mutate(date = zoo::as.yearmon(str_c(month, "/", year), "%m/%Y"))
+  mutate(date = as.yearmon(str_c(month, "/", year), "%m/%Y"))
 
 # Politbarometer: Migration
 polit.fig <- ggplot(barometer.df, aes(x = date, y = pct)) +
   geom_line() +
+  annotate("rect", 
+           xmin = as.yearmon("02/1996", "%m/%Y"),
+           xmax = as.yearmon("07/1996", "%m/%Y"),
+           ymax = Inf, ymin = 0, alpha = 0.3) +
+  annotate("rect", 
+           xmin = as.yearmon("03/2006", "%m/%Y"),
+           xmax = as.yearmon("08/2006", "%m/%Y"),
+           ymax = Inf, ymin = 0, alpha = 0.3) +
+  annotate("rect", 
+           xmin = as.yearmon("04/2016", "%m/%Y"),
+           xmax = as.yearmon("09/2016", "%m/%Y"),
+           ymax = Inf, ymin = 0, alpha = 0.3) +
+  annotate("text", x = as.yearmon("06/2001", "%m/%Y"), y = 1, 
+           label = "Erhebungszeitraum:\nALLBUS") +
+  annotate("segment",
+           x = as.yearmon("07/1996", "%m/%Y"), 
+           xend = as.yearmon("06/2001", "%m/%Y"),
+           y = .85, yend = .94) +
+  annotate("segment",
+           x = as.yearmon("03/2006", "%m/%Y"), 
+           xend = as.yearmon("06/2001", "%m/%Y"),
+           y = .85, yend = .94) + 
+  annotate("segment",
+           x = as.yearmon("04/2016", "%m/%Y"), 
+           xend = as.yearmon("06/2001", "%m/%Y"),
+           y = .9, yend = .94) + 
   scale_y_continuous(labels = scales::percent) +
   labs(x = "", y = "", title = "Wichtige Probleme in Deutschland", 
        subtitle = 'Nennung von "Ausländer" und "Asylanten, Asyl"\n(max. zwei Nennungen)',
@@ -45,4 +71,4 @@ polit.fig <- ggplot(barometer.df, aes(x = date, y = pct)) +
   theme_minimal_grid()
 
 # Export
-ggsave("./figures/Politbarometer.tiff", polit.fig, height = 7, width = 20, units = "cm")
+ggsave("./figures/Politbarometer.tiff", polit.fig, height = 13, width = 20, units = "cm")
