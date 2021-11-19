@@ -27,7 +27,7 @@ barometer.df <- barometer.df %>%
   left_join(y = label_v33, by = c("erstnennung" = "value")) %>%
   left_join(y = label_v34, by = c("zweitnennung" = "value")) %>%
   mutate(across(c(label_v33, label_v34), ~replace(.x, .x %in% c("nicht erhoben", "KA", "weiß nicht"), NA_character_)),
-         across(c(label_v33, label_v34), ~if_else(str_detect(.x, "Asyl|Ausländer|Grenze"), c("Migration"), .x)),
+         across(c(label_v33, label_v34), ~if_else(str_detect(.x, "Asyl|Ausländer"), c("Migration"), .x)),
          migration = case_when(label_v33 == "Migration" | label_v34 == "Migration" ~1,
                                TRUE ~ 0)) %>%
   group_by(month, year) %>%
@@ -40,7 +40,7 @@ polit.fig <- ggplot(barometer.df, aes(x = date, y = pct)) +
   geom_line() +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "", y = "", title = "Wichtige Probleme in Deutschland", 
-       subtitle = 'Nennung von "Ausländer", "Asylanten, Asyl", "Grenze zu Polen"\n(max. zwei Nennungen)',
+       subtitle = 'Nennung von "Ausländer" und "Asylanten, Asyl"\n(max. zwei Nennungen)',
        caption = 'Daten: Forschungsgruppe Wahlen "Politbarometer"') +
   theme_minimal_grid()
 
