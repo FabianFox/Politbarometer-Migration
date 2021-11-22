@@ -20,7 +20,8 @@ label_v34 <- tibble(
 
 # Wrangle
 barometer.df <- barometer.df %>%
-  select(month = v3, year = v4, erstnennung = v33, zweitnennung = v34, repweight = 78, gesweight = 81)
+  select(month = v3, year = v4, erstnennung = v33, zweitnennung = v34, 
+         repweight = 78, gesweight = 81)
 
 # Add labels
 barometer.df <- barometer.df %>%
@@ -67,8 +68,8 @@ polit.fig <- ggplot(barometer.df, aes(x = date, y = pct)) +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "", y = "", title = "Wichtige Probleme in Deutschland", 
        subtitle = 'Nennung von "Ausländer" und "Asylanten, Asyl"\n(max. zwei Nennungen)',
-       caption = 'Daten: Forschungsgruppe Wahlen "Politbarometer"') +
+       caption = 'Daten: Forschungsgruppe Wahlen "Politbarometer", gewichtet') +
   theme_minimal_grid()
 
 # Export
-ggsave("./figures/Politbarometer.tiff", polit.fig, height = 13, width = 20, units = "cm")
+ggsave("./figures/Politbarometer.png", polit.fig, height = 13, width = 20, units = "cm")
