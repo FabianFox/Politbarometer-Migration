@@ -60,7 +60,6 @@ barometer_new1.df <- import("https://www.forschungsgruppe.de/Umfragen/Politbarom
 barometer.df <- barometer.df %>%
   bind_rows(list(barometer_new.df, barometer_new1.df))
   
-
 # Politbarometer: Migration
 polit.fig <- barometer.df %>%
   filter(year(date) >= 2000) %>%
@@ -80,22 +79,22 @@ polit.fig <- barometer.df %>%
                                  "Arbeitslosigkeit" = "#003C76",
                                  "Wirtschaftslage" = "#7E8015")) +
   labs(x = "", y = "", colour = "",
-       title = "<span style = 'font-size:18pt; font-family:Tahoma;'>Wichtige Probleme in Deutschland</span><br>
+       title = "<span style = 'font-size:20pt; font-family:Tahoma;'>Wichtige Probleme in Deutschland</span><br>
        Relativer Anteil von <span style = 'color:#0098D4;'>Migration</span>,
        <span style = 'color:#003C76;'>Arbeitslosigkeit</span> und
        <span style = 'color:#7E8015;'>Wirtschaftslage</span> unter allen Nennungen",
        subtitle = 'Befragte können maximal zwei Probleme nennen.',
        caption = 'Quelle: Forschungsgruppe Wahlen "Politbarometer"; gewichtete Daten\nAuswertung und Darstellung: Wissenschaftlicher Stab des SVR') +
-  theme_ipsum(ticks = TRUE, strip_text_size = 14, subtitle_size = 16,
-              caption_size = 14, caption_face = "plain", grid = "y",
-              axis_title_size = 16, base_family = "Tahoma", base_size = 18) +
+  theme_ipsum(ticks = TRUE, strip_text_size = 16, subtitle_size = 18,
+              caption_size = 16, caption_face = "plain", grid = "y",
+              axis_title_size = 18, base_family = "Tahoma", base_size = 20) +
   theme(legend.position = "bottom", 
-        legend.text = element_text(size = 18), 
+        legend.text = element_text(size = 20), 
         legend.justification = "left",
         plot.caption = element_text(hjust = 0),
         text = element_text(family = "Tahoma", colour = "black"),
         axis.text = element_text(colour = "black"),
-        plot.title = ggtext::element_markdown(size = 18, lineheight = 1.5),
+        plot.title = ggtext::element_markdown(size = 20, lineheight = 1.5),
         panel.grid.minor.x = element_blank(),
         panel.grid.major.x = element_blank(),
         axis.line = element_line(colour = "black"),
