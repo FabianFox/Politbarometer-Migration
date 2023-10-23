@@ -37,7 +37,7 @@ barometer.df <- barometer.df %>%
   select(-c(month, year))
 
 # Add data for 2022f. (Part I)
-barometer_new.df <- import("https://www.forschungsgruppe.de/Umfragen/Politbarometer/Langzeitentwicklung_-_Themen_im_Ueberblick/Politik_II/9_Probleme_1_1.xlsx",
+barometer_new.df <- import("https://www.forschungsgruppe.de/Umfragen/Politbarometer/Langzeitentwicklung_-_Themen_im_Ueberblick/Politik_II/9_Probleme_1.xlsx",
                            skip = 7) %>%
   tibble() %>%
   rename(date = 1) %>%
@@ -48,7 +48,7 @@ barometer_new.df <- import("https://www.forschungsgruppe.de/Umfragen/Politbarome
   filter(concern %in% c("migration"), year(date) > 2021)
 
 # Add data for 2022f. (Part II)
-barometer_new1.df <- import("https://www.forschungsgruppe.de/Umfragen/Politbarometer/Langzeitentwicklung_-_Themen_im_Ueberblick/Politik_II/10_Probleme_2_1.xlsx",
+barometer_new1.df <- import("https://www.forschungsgruppe.de/Umfragen/Politbarometer/Langzeitentwicklung_-_Themen_im_Ueberblick/Politik_II/10_Probleme_2.xlsx",
                             skip = 7) %>%
   rename(date = 1) %>%
   janitor::clean_names() %>%
@@ -59,6 +59,19 @@ barometer_new1.df <- import("https://www.forschungsgruppe.de/Umfragen/Politbarom
 # Merge
 barometer.df <- barometer.df %>%
   bind_rows(list(barometer_new.df, barometer_new1.df))
+
+# Add direct labels
+barometer.lbl <- barometer.df %>% 
+  group_by(concern) %>% 
+  arrange(desc(date)) %>% 
+  slice_head(n = 1) %>% 
+  ungroup() %>%
+  mutate(label = str_to_sentence(concern),
+         date = ymd(date),
+         colour = case_match(label,
+                             "Migration" ~ "#0098D4",
+                             "Arbeitslosigkeit" ~ "#003C76",
+                             "Wirtschaftslage" ~ "#7E8015"))
   
 # Politbarometer: Migration
 polit.fig <- barometer.df %>%
@@ -70,14 +83,18 @@ polit.fig <- barometer.df %>%
                           labels = c("Migration", 
                                      "Arbeitslosigkeit",
                                      "Wirtschaftslage")),
-         date = ymd(date)) %>%
-  ggplot(aes(x = date, y = pct, colour = concern)) +
-  geom_line(size = 1.5) +
-  scale_x_date(breaks = seq.Date(as.Date("1990/01/01"), as.Date("2023/05/31"), "5 years"), date_labels = "%Y") +
+         date = ymd(date),
+         colour = case_match(concern,
+                             "Migration" ~ "#0098D4",
+                             "Arbeitslosigkeit" ~ "#003C76",
+                             "Wirtschaftslage" ~ "#7E8015")) %>%
+  ggplot(aes(x = date, y = pct)) +
+  geom_line(aes(colour = colour), size = 1.5) + 
+  geom_text(data = barometer.lbl, aes(label = label, colour = colour), vjust = 0, hjust = 0, family = "Tahoma", size = 8) +
+  scale_x_date(breaks = c(seq.Date(as.Date("1990/01/01"), as.Date("2023/01/01"), "5 years"), "2023-01-01"), date_labels = "%Y") +
   scale_y_continuous(labels = function(x) str_c(x, "%")) +
-  scale_colour_manual(values = c("Migration" = "#0098D4",
-                                 "Arbeitslosigkeit" = "#003C76",
-                                 "Wirtschaftslage" = "#7E8015")) +
+  scale_colour_identity() +
+  coord_cartesian(expand = TRUE, clip = "off") +
   labs(x = "", y = "", colour = "",
        title = "<span style = 'font-size:20pt; font-family:Tahoma;'>Wichtige Probleme in Deutschland</span><br>
        Relativer Anteil von <span style = 'color:#0098D4;'>Migration</span>,
@@ -88,8 +105,7 @@ polit.fig <- barometer.df %>%
   theme_ipsum(ticks = TRUE, strip_text_size = 16, subtitle_size = 18,
               caption_size = 16, caption_face = "plain", grid = "y",
               axis_title_size = 18, base_family = "Tahoma", base_size = 20) +
-  theme(legend.position = "bottom", 
-        legend.text = element_text(size = 20), 
+  theme(legend.position = "none", 
         legend.justification = "left",
         plot.caption = element_text(hjust = 0),
         text = element_text(family = "Tahoma", colour = "black"),
@@ -99,7 +115,8 @@ polit.fig <- barometer.df %>%
         panel.grid.major.x = element_blank(),
         axis.line = element_line(colour = "black"),
         axis.ticks.x = element_line(colour = "black", size = 0.5),
-        axis.ticks.y = element_line(colour = "black", size = 0.5))
+        axis.ticks.y = element_line(colour = "black", size = 0.5),
+        plot.margin = margin(30, 125, 10, 10))
 
 # Export
-ggsave("./figures/Politbarometer.png", polit.fig, height = 13, width = 20, units = "cm")
+ggsave("./figures/Politbarometer.png", polit.fig, height = 22, width = 40, units = "cm", device = ragg::agg_png)
